@@ -1,0 +1,273 @@
+---
+title: "Evidencia 2"
+author: "Erasmo Villarreal Sánchez A01197677"
+date: "30/4/2021"
+output: html_document
+---
+
+#PARTE 1 VIDEO
+https://youtu.be/pgc1qMTZFn8
+
+##Referencias pt1
+Coronaviridae Study Group of the International Committee on Taxonomy of Viruses (2020). The species Severe acute respiratory syndrome-related coronavirus: classifying 2019-nCoV and naming it SARS-CoV-2. Nature microbiology, 5(4), 536–544. https://doi.org/10.1038/s41564-020-0695-z
+
+Zhang, T., Wu, Q., & Zhang, Z. (2020). Probable Pangolin Origin of SARS-CoV-2 Associated with the COVID-19 Outbreak. Current biology : CB, 30(7), 1346–1351.e2. https://doi.org/10.1016/j.cub.2020.03.022
+
+Atzrodt, C. L., Maknojia, I., McCarthy, R., Oldfield, T. M., Po, J., Ta, K., Stepp, H. E., & Clements, T. P. (2020). A Guide to COVID-19: a global pandemic caused by the novel coronavirus SARS-CoV-2. The FEBS journal, 287(17), 3633–3650. https://doi.org/10.1111/febs.15375
+
+SOS Telemedicina - Universidad Central de Venezuela (2020) Nuevo Coronavirus SARS-CoV-2 Origen y biología - Dra. Flor Pujol https://www.youtube.com/watch?v=L77aeJw78g0&ab_channel=SOSTelemedicina-UniversidadCentraldeVenezuela
+
+ QuieroSerMédico (2020) ¿QUÉ ES EL CORONAVIRUS? ☣🚨: síntomas, tipos (SARS, MERS, SARS-CoV-2) y prevención | Virología
+https://www.youtube.com/watch?v=eZSHq2Val3I&ab_channel=QuieroSerM%C3%A9dico
+
+#PARTE 2
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+virus <- c(  "MZ028823", "MZ028826", "MT827872", "MT827190", "MW181845","MW555280","MT470139","MT470145","MW306667","MW199150","MW332225","MW305251","OB994411", "OB994415","MW642248", "MW642250","MT704824","MT704820","LR883972","LR883970")
+
+#se cargan las librerías
+library(seqinr)
+library(Biostrings)
+library(seqinr)
+library(adegenet)
+library(ape)
+library(ggtree)
+library(DECIPHER)
+library(viridis)
+library(ggplot2)
+library(ggmsa)
+
+#funcion de porcentaje que es usada mas adelante
+porcentaje = function(dna){
+  longitud = length(dna)
+  print(dna)
+  counterA = 0
+  counterT = 0
+  counterG = 0
+  counterC = 0
+  counterN = 0 
+  for(i in 1:longitud){
+    if (dna[i] == "a"){
+      counterA = counterA + 1
+    } else if (dna[i] == "t" ){
+      counterT = counterT + 1
+    } else if (dna[i]=="g"){
+      counterG = counterG + 1
+    } else if (dna[i] == "c"){
+      counterC = counterC + 1
+    } else{
+      counterN = counterN + 1
+    }
+  }
+
+  return(c(counterA, counterT, counterG, counterC))
+  
+  
+}
+
+
+virus_sequences <- read.GenBank(virus)
+
+#guardamos los nombres de las variantes en un vector (PAIS DE DONDE PROVIENE Y PANGO)
+variantes = c(variantes=c("USA_R2","USA_R2 2","Brazil_B1","Brazil_B1 2","India_B.6.6","India_B.6.6 2","France_B.40", "France_B.40 2","Turkey_B.1.9","Turkey_B.1.9 2", "Russia_B1","Russia_B1 2","UK_B.1.177","UK_B.1.177 2","Italy_P1","Italy_P1 2","Germany_B.1.1","Germany_B.1.1 2","Spain_B.1.610","Spain_B.1.610 2"))
+
+#aqui se calculan y se guardan las longitudes de las variantes en un vector
+longitudes = c(length(virus_sequences$MZ028823),length(virus_sequences$MZ028826),length(virus_sequences$MT827872),length(virus_sequences$MT827190),length(virus_sequences$MW181845),length(virus_sequences$MW555280),length(virus_sequences$MT470139),length(virus_sequences$MT470145),length(virus_sequences$MW306667),length(virus_sequences$MW199150),length(virus_sequences$MW332225),length(virus_sequences$MW305251),length(virus_sequences$OB994411),length(virus_sequences$OB994415),length(virus_sequences$MW642248),length(virus_sequences$MW642250),length(virus_sequences$MT704824),length(virus_sequences$MT704820),length(virus_sequences$LR883972),length(virus_sequences$LR883970))
+
+
+
+
+```
+```{r}
+for(i in 1:20){
+  print(paste("La longitud de",variantes[i],"es",longitudes[i]))
+}
+```
+```{r}
+
+#AQUI SE GRAFICAN LAS LONGITUDES DE CADA VARIANTE
+data <- data.frame(longitudes,variantes)
+
+ggplot(data, aes(x=longitudes, y=variantes)) + geom_bar(stat = "identity")
+```
+```{r, include=FALSE}
+
+
+
+#cambiamos los nombres de los accesion numbers a el nombre que nosotros le dimos a las variantes
+for(i in 1:length(virus_sequences)){
+  names(virus_sequences)[i]=variantes[i]
+}
+
+write.dna(virus_sequences,  file ="virus_seqs.fasta", format = "fasta", append =
+FALSE, nbcol = 6, colsep = " ", colw = 10)
+virus_seq_not_align <- readDNAStringSet("virus_seqs.fasta", format = "fasta")
+virus_seq_not_align
+virus_seq_not_align <- OrientNucleotides(virus_seq_not_align)
+virus_seq_align <- AlignSeqs(virus_seq_not_align)
+writeXStringSet(virus_seq_align, file="virus_seq_align.fasta")
+virus_aligned <- read.alignment("virus_seq_align.fasta", format = "fasta")
+matriz_distancia <- dist.alignment(virus_aligned, matrix = "similarity")
+virus_tree <- nj(matriz_distancia)
+class(virus_tree) 
+virus_tree <- ladderize(virus_tree)
+
+
+#AQUI SE GENERAN 20 ESPACIOS PARA GUARDAR LAS SECUENCIAS YA ALINEADAS
+virusCadena = c("","","","","","","","","","","","","","","","","","","","")
+for(i in 1:20){
+  virusCadena[i] = virus_aligned$seq[[i]][[1]] 
+  
+}
+
+#AQUI SE CALCULA EL TOTAL DE BASES QUE HAY EN CADA SECUENCIA
+nusa = porcentaje(strsplit(virusCadena[1], split="")[[1]])
+nusa2 = porcentaje(strsplit(virusCadena[2], split="")[[1]])
+nBra = porcentaje(strsplit(virusCadena[3], split="")[[1]])
+nBra2 = porcentaje(strsplit(virusCadena[4], split="")[[1]])
+nIn = porcentaje(strsplit(virusCadena[5], split="")[[1]])
+nIn2 = porcentaje(strsplit(virusCadena[6], split="")[[1]])
+nFra= porcentaje(strsplit(virusCadena[7], split="")[[1]])
+nFra2 = porcentaje(strsplit(virusCadena[8], split="")[[1]])
+nTur = porcentaje(strsplit(virusCadena[9], split="")[[1]])
+nTur2 = porcentaje(strsplit(virusCadena[10], split="")[[1]])
+nRu = porcentaje(strsplit(virusCadena[11], split="")[[1]])
+nRu2 = porcentaje(strsplit(virusCadena[12], split="")[[1]])
+nUk = porcentaje(strsplit(virusCadena[13], split="")[[1]])
+nUk2 = porcentaje(strsplit(virusCadena[14], split="")[[1]])
+nIt = porcentaje(strsplit(virusCadena[15], split="")[[1]])
+nIt2 = porcentaje(strsplit(virusCadena[16], split="")[[1]])
+nGer = porcentaje(strsplit(virusCadena[17], split="")[[1]])
+nGer2 = porcentaje(strsplit(virusCadena[18], split="")[[1]])
+nSp= porcentaje(strsplit(virusCadena[19], split="")[[1]])
+nSp2 = porcentaje(strsplit(virusCadena[20], split="")[[1]])
+```
+
+```{r}
+#AQUI SE GRAFICAN CADA UNA DE LAS BASES DE RESPECTO A LA DE LAS DEMÁS VARIANTES
+  data <- data.frame(
+  BASES=c(nusa[1],nusa2[1],nBra[1],nBra2[1],nIn[1],nIn2[1],nFra[1],nFra2[1],nTur[1],nTur2[1],nRu[1],nRu2[1],nUk[1],nUk2[1],nIt[1],nIt2[1],nGer[1],nGer2[1],nSp[1],nSp2[1]) ,  
+  ADENINA=c("USA_R2","USA_R2 2","Brazil_B1","Brazil_B1 2","India_B.6.6","India_B.6.6 2","France_B.40", "France_B.40 2","Turkey_B.1.9","Turkey_B.1.9 2", "Russia_B1","Russia_B1 2","UK_B.1.177","UK_B.1.177 2","Italy_P1","Italy_P1 2","Germany_B.1.1","Germany_B.1.1 2","Spain_B.1.610","Spain_B.1.610 2")
+  )
+
+ggplot(data, aes(x=ADENINA, y=BASES)) + 
+  geom_bar(stat = "identity") +
+  coord_flip()
+
+data2 <- data.frame(
+  BASES=c(nusa[2],nusa2[2],nBra[2],nBra2[2],nIn[2],nIn2[2],nFra[2],nFra2[2],nTur[2],nTur2[2],nRu[2],nRu2[2],nUk[2],nUk2[2],nIt[2],nIt2[2],nGer[2],nGer2[2],nSp[2],nSp2[2]) ,  
+  TININA=c("USA_R2","USA_R2 2","Brazil_B1","Brazil_B1 2","India_B.6.6","India_B.6.6 2","France_B.40", "France_B.40 2","Turkey_B.1.9","Turkey_B.1.9 2", "Russia_B1","Russia_B1 2","UK_B.1.177","UK_B.1.177 2","Italy_P1","Italy_P1 2","Germany_B.1.1","Germany_B.1.1 2","Spain_B.1.610","Spain_B.1.610 2")
+)
+
+ggplot(data2, aes(x=TININA, y=BASES)) + 
+  geom_bar(stat = "identity") +
+  coord_flip()
+
+
+data3 <- data.frame(
+  BASES=c(nusa[3],nusa2[3],nBra[3],nBra2[3],nIn[3],nIn2[3],nFra[3],nFra2[3],nTur[3],nTur2[3],nRu[3],nRu2[3],nUk[3],nUk2[3],nIt[3],nIt2[3],nGer[3],nGer2[3],nSp[3],nSp2[3]) ,  
+  GUANINA=c("USA_R2","USA_R2 2","Brazil_B1","Brazil_B1 2","India_B.6.6","India_B.6.6 2","France_B.40", "France_B.40 2","Turkey_B.1.9","Turkey_B.1.9 2", "Russia_B1","Russia_B1 2","UK_B.1.177","UK_B.1.177 2","Italy_P1","Italy_P1 2","Germany_B.1.1","Germany_B.1.1 2","Spain_B.1.610","Spain_B.1.610 2")
+  )
+
+ggplot(data3, aes(x=GUANINA, y=BASES)) + 
+  geom_bar(stat = "identity") +
+  coord_flip()
+
+
+data4 <- data.frame(
+  BASES=c(nusa[4],nusa2[4],nBra[4],nBra2[4],nIn[4],nIn2[4],nFra[4],nFra2[4],nTur[4],nTur2[4],nRu[4],nRu2[4],nUk[4],nUk2[4],nIt[4],nIt2[4],nGer[4],nGer2[4],nSp[4],nSp2[4]) ,  
+  CITOSINA=c("USA_R2","USA_R2 2","Brazil_B1","Brazil_B1 2","India_B.6.6","India_B.6.6 2","France_B.40", "France_B.40 2","Turkey_B.1.9","Turkey_B.1.9 2", "Russia_B1","Russia_B1 2","UK_B.1.177","UK_B.1.177 2","Italy_P1","Italy_P1 2","Germany_B.1.1","Germany_B.1.1 2","Spain_B.1.610","Spain_B.1.610 2")
+  )
+
+ggplot(data4, aes(x=CITOSINA, y=BASES)) + 
+  geom_bar(stat = "identity") + 
+  coord_flip() 
+
+```
+
+```{r}
+plot(virus_tree, cex = 0.6)
+title("Análisis jerárquico global, de variantes alrededor del mundo")
+
+ggmsa(virus_seq_not_align, 360, 390, color = "Chemistry_AA")
+plot_virus <- ggtree(virus_tree ) + geom_tiplab()
+```
+##Conclusion
+Se obtuvieron las secuencias de GenBank por medio de Accession Numbers que se seleccionaron en NCBI Virus,  las variantes de cada país que se recolectaron fueron de un Pango en específico por país la cual predomina más en esa región de acuerdo a la base de datos de NCBI, para que se pudiera visualizar esta jerarquización de los virus en cada país, en los dos gráficos anteriores se ve con notoriedad la variación, ya que cada par de secuencias de cada país está en el mismo nodo juntos, porque son del mismo Pango. La alineación de los nucleótidos también nos deja apreciar cómo han cambiado estos virus, ya que no todos tienen el mismo orden, como se muestra en el gráfico, esto afecta en las características del virus, estas variaciones en los genomas surgen mientras el virus se reproduce en nuestro organismo, ya que al reproducirse el virus, ya que llegan a haber errores en el alineamiento de los nucleótidos, cabe recalcar que hasta dentro de los pangos diferencias en las secuencias. 
+
+Las secuencias si son diferentes entre cada país, tienen diferente orden, pero sabemos que es el mismo virus, por lo cual tienen las mismas proporciones en realción a la cantidad de nucleotidos por cada virus, pero no son exactamente iguales, por lo cual no podemos decir que son muy diferentes, como vemos en las graficas de BASES y LONGITUDES. Gracias a la información que proporciona la Universidad Johns Hopkins, se obtuvieron los contagios acumulados, y el total de muertes causadas por el Covid 19 en cada región geográfica, haciendo cálculos (número de muertes, respecto al número de infectados) se llegó a la conclusión de que en donde el virus ha sido más mortal dentro del rango de los 10 países con más casos reportados es Italia , teniendo un índice de mortalidad del 3.08%, cabe mencionar que en Italia se han reportado casos de esta variante que originalmente es proveniente de Brasil (P.1),  junto con las variantes de Reino Unido y Brasil, con un 2.88% y un 2.76% de índice de mortalidad respectivamente. 
+
+En la gráfica de análisis jerárquico se puede observar la lejanía que tiene la variante (proveniente de brasil) analizada en Italia respecto a las demás variantes, esto quiere decir que al ser un poco más distante de las demás, ha pasado por múltiples mutaciones más que las otras variantes de los demás países. Cambios de los cuales aún no hay información acerca de las consecuencias de estas mutaciones a ciencia cierta, ya que no se sabe si las alineaciones del nucleótidos las hace más mortales a las variantes que otras, pero podemos observar que tienen un nodo en común (Brasil, Italia, Reino Unido, entre otros) que es de donde se derivan todas las demás secuencias, por cual debe de haber una relación entre esas variantes del SARS-CoV 2 en ese nodo, que las hace más contagiosas y mortales, claro que pueden haber otros factores secundarios como el sistema de salud del país el cual puede ayudar a que se combata el virus, pero entonces para descartar el caso en el que sí sea por la mutación, podría ser un futuro caso de estudio para un laboratorio, el denominar si es una casualidad o si realmente hay una relación entre las mutaciones y el número de muertes dando como resultado una lejanía de las demás variantes en el árbol filogenético de las variantes P.1. “Si tiene un alto nivel de transmisión como el que se reporta ahora en Brasil, aumenta el riesgo de nuevas mutaciones y variantes” menciona Ester Sabino, científica de la facultad de Medicina de la Universidad de Sao Paulo. Es por eso que nuestra responsabilidad social es el evitar el contagio de este virus para que no siga mutando y que así las vacunas que existen actualmente puedan seguir siendo efectivas contra el SARS CoV 2. 
+
+##Referencias
+Laha, S., Chakraborty, J., Das, S., Manna, S. K., Biswas, S., & Chatterjee, R. (2020). Characterizations of SARS-CoV-2 mutational profile, spike protein stability and viral transmission. Infection, genetics and evolution : journal of molecular epidemiology and evolutionary genetics in infectious diseases, 85, 104445. https://doi.org/10.1016/j.meegid.2020.104445
+
+BBC News Mundo, (2020),  ¿Por qué es tan alta la mortalidad en Italia? consultado en: https://www.bbc.com/mundo/noticias-internacional-52037774
+
+ConSalud, (2021), La variante P1 del SARS-CoV-2 podría volverse más peligrosa según un estudio, consultado en: https://www.consalud.es/pacientes/especial-coronavirus/variante-p1-sars-cov-2-volverse-peligrosa-estudio_95607_102.html
+
+Johns Hopkins University, COVID 19 Dashboard, Consultado en: https://coronavirus.jhu.edu/map.html
+
+
+```{r, include=FALSE}
+
+citation("Biostrings")
+citation("seqinr")
+citation("adegenet")
+citation("ape")
+citation("ggtree")
+citation("DECIPHER")
+citation("viridis")
+citation("ggplot2")
+citation("ggmsa")
+```
+
+##Referencias de secuencias de NCBI: 
+  https://www.ncbi.nlm.nih.gov/labs/virus/vssi/#/
+  Accession Numbers: 
+    1) MZ028823
+    2) MZ028826
+    3) MT827872
+    4) MT827190
+    5) MW181845
+    6) MW555280
+    7) MT470139
+    8) MT470145
+    9) MW306667
+    10) MW199150
+    11) MW332225
+    12) MW305251
+    13) OB994411
+    14) OB994415
+    15) MW642248
+    16) MW642250
+    17) MT704824
+    18) MT704820
+    19) LR883972
+    20) LR883970
+
+##Citas librerías:
+  - Guangchuang Yu and Lang Zhou (2021). ggmsa: Plot Multiple Sequence Alignment using
+  'ggplot2'. R package version 0.0.6. https://CRAN.R-project.org/package=ggmsa
+  - H. Wickham. ggplot2: Elegant Graphics for Data Analysis. Springer-Verlag New York, 2016.
+  - Simon Garnier, Noam Ross, Robert Rudis, Antônio P. Camargo, Marco Sciaini, and Cédric
+  Scherer (2021). Rvision - Colorblind-Friendly Color Maps for R. R package version 0.6.0.
+  - Guangchuang Yu. Using ggtree to visualize data on tree-like structures. Current
+  Protocols in Bioinformatics, 2020, 69:e96. doi: 10.1002/cpbi.96
+  - Guangchuang Yu, Tommy Tsan-Yuk Lam, Huachen Zhu, Yi Guan. Two methods for mapping and
+  visualizing associated data on phylogeny using ggtree. Molecular Biology and Evolution
+  2018, 35(2):3041-3043. doi: 10.1093/molbev/msy194
+  - Guangchuang Yu, David Smith, Huachen Zhu, Yi Guan, Tommy Tsan-Yuk Lam. ggtree: an R
+  package for visualization and annotation of phylogenetic trees with their covariates and
+  other associated data. Methods in Ecology and Evolution 2017, 8(1):28-36.
+  doi:10.1111/2041-210X.12628
+  - Jombart, T. (2008) adegenet: a R package for the multivariate analysis of genetic
+  markers. Bioinformatics 24: 1403-1405. doi: 10.1093/bioinformatics/btn129
+  - Jombart T. and Ahmed I. (2011) adegenet 1.3-1: new tools for the analysis of genome-wide
+  SNP data. Bioinformatics. doi: 10.1093/bioinformatics/btr521
+  - H. Pagès, P. Aboyoun, R. Gentleman and S. DebRoy (2020). Biostrings: Efficient
+  manipulation of biological strings. R package version 2.58.0.
+  https://bioconductor.org/packages/Biostrings
+  
+  

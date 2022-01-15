@@ -1,0 +1,404 @@
+---
+title: "ev01_a0119767"
+author: "Erasmo Villarreal SÃ¡nchez"
+date: "04/21/2021"
+output: html_document
+---
+
+# Evidencia 1
+## Parte 1
+
+Investiga, ¿Cuál es la situación actual de COVID-19 a nivel mundial, en México, en tu estado de origen y en tu municipio, alcaldía o colonia? Puedes iniciar tu búsqueda en el sitio de Johns Hopkins  (Enlaces a un sitio externo.)
+		Situación de México de COVID-19 al día 20 de Abril 2021
+Total de casos confirmados de 2.306.910
+Total de muertos 212.466
+		Situación de Nuevo León de COVID-19  al día 20 de Abril 2021
+Total de casos confirmados de 174,060
+Total de muertos 10,511	
+		Situación de General Escobedo de COVID-19 al día 20 de Abril 2021
+Total de casos confirmados de 11,312
+ 
+¿Cuál fue la primera variante del virus que se propagó a todo el mundo?
+  Según datos de la OMS a principios de febrero 2020 apareció la primera variante del COVID-19, D614G
+  Ésta acabó por propagarse en todo en el mundo y en junio de ese mismo año se terminó por convertir en     la variante más transmitida. 
+ 
+¿Cuáles son las otras variantes del virus que existen en otras regiones del mundo?
+Dinamarca 
+  Cluster 5
+Reino Unido 
+  SARS-CoV-2 VOC 202012/01
+  Sudáfrica
+  501Y.V2
+Estados Unidos
+  B.1.1.7 Proveniente de Reino Unido pero descubierto en EUA
+  B.1.35 Proveniente de Japón y Brasil
+  B.1.43 California
+  B.1.52 Nueva York noviembre 2020
+  B.1.53 Nueva York diciembre 2020    
+ 
+Japón/Brasil 
+  P.1
+  P.2
+ 
+¿Cómo buscarías información de la variante del virus en tu país? 
+  Dentro de bases de datos como NCBI en las cuales podemos encontrar información de cualquier tipo de variante de cualquier virus. O en artículos publicados por universidades, o por organizaciones las cuales sean confiables para obtener información. 
+ 
+Imagina que te encuentras en una situación similar a la de Li Wenliang, médico chino que intentó alertar sobre el brote de coronavirus en su país, pero fue detenido por las autoridades y obligado a retractarse, ¿qué harías en su caso? Selecciona un inciso:a) Lo reportas al centro de investigación o la universidad. b) Lo reportas a la prensa. c) Guardas la información. Elige y justifica tu respuesta. Revisa el siguiente video como apoyo
+
+  Yo en la situación de Li Wenliang probablemente al darme cuenta que es un virus altamente peligroso y contagioso, alertaría a mis seres cercanos, a la prensa extranjera (como dice la opción b), ya que si alerto a la prensa local lo más probable es que no llegue muy lejos esa información, por la censura que maneja el gobierno chino, y pondría mi vida en riesgo sin ningún sentido. Alertando a la prensa extranjera estás difundiendo el mensaje de que hay un virus muy contagioso en tu localidad y estás convirtiendo eso en un tema de importancia internacional, compartiendo el hecho de que hay que tomar medidas de sanitización para prevenir los contagios de la enfermedad y que se investigue acerca de este virus en universidades y centros de investigación para obtener información acerca de este virus, tu vida seguiría estando en riesgo pero sería por un bien mayor hacia el mundo, dando a conocer a la humanidad a su enemigo más peligroso al que se ha enfrentado en años, el cual es invisible. Lamentablemente Li Wenliang falleció a causa del coronavirus pero se sabe que él trató de evitar que este virus se propagara.
+
+
+## Parte 2
+
+```{r}
+library(seqinr)
+library(ape)
+library(ggplot2)
+
+longitud = function(dna){
+  longi = length(dna)
+  print(longi)
+  return(longi)
+}
+hComple = function(dna,longitud){
+  for(i in 1:length(dna)){
+    if (dna[i] == "a"){
+      dna[i] = "t"
+    } else if (dna[i] == "t" ){
+      dna[i] = "a"
+    } else if (dna[i]=="g"){
+      dna[i] = "c"
+    } else if (dna[i] == "c"){
+      dna[i] = "g"
+    }
+  }
+  return(dna)
+}
+porcentaje = function(dna,longitud,f){
+  counterA = 0
+  counterT = 0
+  counterG = 0
+  counterC = 0
+  counterN = 0 
+  for(i in 1:longitud){
+    if (dna[i] == "a"){
+      counterA = counterA + 1
+    } else if (dna[i] == "t" ){
+      counterT = counterT + 1
+    } else if (dna[i]=="g"){
+      counterG = counterG + 1
+    } else if (dna[i] == "c"){
+      counterC = counterC + 1
+    } else{
+      counterN = counterN + 1
+    }
+  }
+  numA=((counterA/longitud)*100)
+  numT=((counterT/longitud)*100)
+  numG=((counterG/longitud)*100)
+  numC=((counterC/longitud)*100)
+  numN=((counterN/longitud)*100)
+  porA = paste(as.character(round((counterA/longitud),3)*100),"%")
+  porT = paste(as.character(round((counterT/longitud),3)*100),"%")
+  porG = paste(as.character(round((counterG/longitud),3)*100),"%")
+  porC = paste(as.character(round((counterC/longitud),3)*100),"%")
+  porN = paste(as.character(round((counterN/longitud),3)*100),"%")
+  
+  
+  if (f==1){
+    print(paste("El porcentaje de Adenina es",porA))
+    print(paste("El porcentaje de Tinina es",porT))
+    print(paste("El porcentaje de Guanina es",porG))
+    print(paste("El porcentaje de Citosina es",porC))
+    print(paste("El porcentaje de Desconocido es",porN))
+    return(c(numA,numT,numG,numC))
+    }
+  else if (f==2){
+    #var = as.character(((round((numG+numC),3))))
+    print(paste("El porcentaje de GC es",as.character(round((numG+numC),3)),"%"))
+    return(round((numG+numC),3))
+  }else{
+    return(c(counterA, counterT, counterG, counterC))
+  }
+  
+}
+
+fuk1 = read.fasta("uk1.fasta")
+fuk2 = read.fasta("uk2.fasta")
+fusa1 = read.fasta("usa1.fasta")
+fusa2 = read.fasta("usa2.fasta")
+fmx1 = read.fasta("mx1.fasta")
+fmx2 =  read.fasta("mx2.fasta")
+fchi1 =  read.fasta("chi1.fasta")
+fchi2 =  read.fasta("chi2.fasta")
+fbra1 =  read.fasta("bra1.fasta") #en realidad este es de Uruguay
+fbra2 =  read.fasta("bra2.fasta") #este es de Chile
+
+uk1 = c(fuk1[[1]])
+uk2 = c(fuk2[[1]])
+usa1 = c(fusa1[[1]])
+usa2 = c(fusa2[[1]])
+mx1 = c(fmx1[[1]])
+mx2 = c(fmx2[[1]])
+chi1 = c(fchi1[[1]])
+chi2 = c(fchi2[[1]])
+bra1 = c(fbra1[[1]])
+bra2= c(fbra2[[1]])
+```
+```{r}
+#LONGITUD DE LAS SECUENCIAS
+print("Longitud en variantes de Reino Unido")
+lonUk1=longitud(uk1)
+lonUk2=longitud(uk2)
+print("Longitud en variantes de Estados Unidos")
+lonUsa1=longitud(usa1)
+lonUsa2=longitud(usa2)
+print("Longitud en variantes de MÃ©xico")
+lonmx1=longitud(mx1)
+lonmx2=longitud(mx2)
+print("Longitud en variantes de China")
+lonChi1=longitud(chi1)
+lonChi2=longitud(chi2)
+print("Longitud en variantes de Brasil")
+lonBra1=longitud(bra1)
+lonBra2=longitud(bra2)
+```
+```{r}
+#PORCENTAJE DE NUCLEOTIDOS
+print("Porcentaje de nucleotidos en variantes de Reino Unido")
+pUk1 = porcentaje(uk1,lonUk1,1)
+pUk2 = porcentaje(uk2,lonUk2,1)
+print("Porcentaje de nucleotidos en variantes de Estados Unidos")
+pUsa1 = porcentaje(usa1,lonUsa1,1)
+pUsa2 = porcentaje(usa2,lonUsa2,1)
+print("Porcentaje de nucleotidos en variantes de MÃ©xico")
+pmx1 = porcentaje(mx1,lonmx1,1)
+pmx2 = porcentaje(mx2,lonmx2,1)
+print("Porcentaje de nucleotidos variantes de en China")
+pChi1 = porcentaje(chi1,lonChi1,1)
+pChi2 = porcentaje(chi2,lonChi2,1)
+print("Porcentaje de nucleotidos en variantes de Brasil")
+pBra1 = porcentaje(bra1,lonBra1,1)
+pBra2 = porcentaje(bra2,lonBra2,1)
+```
+```{r}
+#PORCENTAJE DE GC
+print("Porcentaje de GC en variantes de Reino Unido")
+gcUk1 = porcentaje(uk1,lonUk1,2)
+gcUk2 = porcentaje(uk2,lonUk2,2)
+print("Porcentaje de GC en variantes de Estados Unidos")
+gcUsa1 = porcentaje(usa1,lonUsa1,2)
+gcUsa2 = porcentaje(usa2,lonUsa2,2)
+print("Porcentaje de GC en variantes de MÃ©xico")
+gcmx1 = porcentaje(mx1,lonmx1,2)
+gcmx2 = porcentaje(mx2,lonmx2,2)
+print("Porcentaje de GC en variantes de China")
+gcChi1 = porcentaje(chi1,lonChi1,2)
+gcChi2 = porcentaje(chi2,lonChi2,2)
+print("Porcentaje de GC en variantes de Brasil")
+gcBra1 = porcentaje(bra1,lonBra1,2)
+gcBra2 = porcentaje(bra2,lonBra2,2)
+
+#Numeros reales de nucleotidos
+nUk1 = porcentaje(uk1,lonUk1,4)
+nUk2 = porcentaje(uk2,lonUk2,4)
+nUsa1 = porcentaje(usa1,lonUsa1,4)
+nUsa2 = porcentaje(usa2,lonUsa2,4)
+nmx1 = porcentaje(mx1,lonmx1,4)
+nmx2 = porcentaje(mx2,lonmx2,4)
+nChi1 = porcentaje(chi1,lonChi1,4)
+nChi2 = porcentaje(chi2,lonChi2,4)
+nBra1 = porcentaje(bra1,lonBra1,4)
+nBra2 = porcentaje(bra2,lonBra2,4)
+```
+```{r}
+#Graficas de nucleotidos
+
+
+  data <- data.frame(
+  PORCENTAJE=c(pUk1[1],pUk2[1],pUsa1[1],pUsa2[1],pmx1[1],pmx2[1],pChi1[1],pChi2[1],pBra1[1],pBra2[1]) ,  
+  ADENINA=c("RU B.1.1.7"," RU B.1.258","USA W.1","USA P.1","MX P.2","MX B.1.558","CHA A","CHA B","URU N.7","CHI C.26")
+  )
+
+ggplot(data, aes(x=ADENINA, y=PORCENTAJE)) + 
+  geom_bar(stat = "identity") +
+  coord_flip()
+
+data2 <- data.frame(
+  PORCENTAJE=c(pUk1[2],pUk2[2],pUsa1[2],pUsa2[2],pmx1[2],pmx2[2],pChi1[2],pChi2[2],pBra1[2],pBra2[2]) ,  
+  TININA=c("RU B.1.1.7"," RU B.1.258","USA W.1","USA P.1","MX P.2","MX B.1.558","CHA A","CHA B","URU N.7","CHI C.26")
+  )
+
+ggplot(data2, aes(x=TININA, y=PORCENTAJE)) + 
+  geom_bar(stat = "identity") +
+  coord_flip()
+
+
+data3 <- data.frame(
+  PORCENTAJE=c(pUk1[3],pUk2[3],pUsa1[3],pUsa2[3],pmx1[3],pmx2[3],pChi1[3],pChi2[3],pBra1[3],pBra2[3]) ,  
+  GUANINA=c("RU B.1.1.7"," RU B.1.258","USA W.1","USA P.1","MX P.2","MX B.1.558","CHA A","CHA B","URU N.7","CHI C.26")
+  )
+
+ggplot(data3, aes(x=GUANINA, y=PORCENTAJE)) + 
+  geom_bar(stat = "identity") +
+  coord_flip()
+
+
+data4 <- data.frame(
+  PORCENTAJE=c(pUk1[4],pUk2[4],pUsa1[4],pUsa2[4],pmx1[4],pmx2[4],pChi1[4],pChi2[4],pBra1[4],pBra2[4]) ,  
+  CITOSINA=c("RU B.1.1.7"," RU B.1.258","USA W.1","USA P.1","MX P.2","MX B.1.558","CHA A","CHA B","URU N.7","CHILE C.26")
+  )
+
+ggplot(data4, aes(x=CITOSINA, y=PORCENTAJE)) + 
+  geom_bar(stat = "identity") + 
+  coord_flip() 
+
+
+
+
+```
+```{r}
+
+
+
+data <- data.frame(
+  CANTIDAD=c(nUk1[1],nUk2[1],nUsa1[1],nUsa2[1],nmx1[1],nmx2[1],nChi1[1],nChi2[1],nBra1[1],nBra2[1]) ,  
+  ADENINA=c("RU B.1.1.7"," RU B.1.258","USA W.1","USA P.1","MX P.2","MX B.1.558","CHA A","CHA B","URU N.7","CHI C.26")
+  )
+
+ggplot(data, aes(x=ADENINA, y=CANTIDAD)) + 
+  geom_bar(stat = "identity") +
+  coord_flip()
+
+data2 <- data.frame(
+  CANTIDAD=c(nUk1[2],nUk2[2],nUsa1[2],nUsa2[2],nmx1[2],nmx2[2],nChi1[2],nChi2[2],nBra1[2],nBra2[2]) ,  
+  TININA=c("RU B.1.1.7"," RU B.1.258","USA W.1","USA P.1","MX P.2","MX B.1.558","CHA A","CHA B","URU N.7","CHI C.26")
+  )
+
+ggplot(data2, aes(x=TININA, y=CANTIDAD)) + 
+  geom_bar(stat = "identity") +
+  coord_flip()
+
+
+data3 <- data.frame(
+  CANTIDAD=c(nUk1[3],nUk2[3],nUsa1[3],nUsa2[3],nmx1[3],nmx2[3],nChi1[3],nChi2[3],nBra1[3],nBra2[3]) ,  
+  GUANINA=c("RU B.1.1.7"," RU B.1.258","USA W.1","USA P.1","MX P.2","MX B.1.558","CHA A","CHA B","URU N.7","CHI C.26")
+  )
+
+ggplot(data3, aes(x=GUANINA, y=CANTIDAD)) + 
+  geom_bar(stat = "identity") +
+  coord_flip()
+
+
+data4 <- data.frame(
+  CANTIDAD=c(nUk1[4],nUk2[4],nUsa1[4],nUsa2[4],nmx1[4],nmx2[4],nChi1[4],nChi2[4],nBra1[4],nBra2[4]) ,  
+  CITOSINA=c("RU B.1.1.7"," RU B.1.258","USA W.1","USA P.1","MX P.2","MX B.1.558","CHA A","CHA B","URU N.7","CHILE C.26")
+  )
+
+ggplot(data4, aes(x=CITOSINA, y=CANTIDAD)) + 
+  geom_bar(stat = "identity") + 
+  coord_flip() 
+
+
+```
+```{r}
+
+#proporciÃ³n de nucleotidos por genoma en porcentaje
+par(mar=c(4,4,4,4))
+par(mfrow=c(2,2))
+barplot(pUk1,main = "REINO UN B.1.1.7",names.arg=c("a","t","g","c"))
+barplot(pUk2,main = " REINO UN B.1.258",names.arg=c("a","t","g","c"))
+barplot(pUsa1,main = "USA W.1",names.arg=c("a","t","g","c"))
+barplot(pUsa2,main = "USA P.1",names.arg=c("a","t","g","c"))
+barplot(pmx1,main = "MEX P.2",names.arg=c("a","t","g","c"))
+barplot(pmx2,main = "MEX B.1.558",names.arg=c("a","t","g","c"))
+barplot(pChi1,main = "CHINA A",names.arg=c("a","t","g","c"))
+barplot(pChi2,main = "CHINA B",names.arg=c("a","t","g","c"))
+barplot(pBra1,main = "URUGUAY N.7",names.arg=c("a","t","g","c"))
+barplot(pBra2,main = "CHILE C.26",names.arg=c("a","t","g","c"))
+
+```
+```{r}
+#COMPLEMENTARIA
+comUk1 = hComple(uk1,lonUk1)
+comUk2 = hComple(uk2,lonUk2)
+comUsa1 = hComple(usa1,lonUsa1)
+comUsa2 = hComple(usa2,lonUsa2)
+commx1 = hComple(mx1,lonmx1)
+commx2 = hComple(mx2,lonmx2)
+comChi1 = hComple(chi1,lonChi1)
+comChi2 = hComple(chi2,lonChi2)
+comBra1 = hComple(bra1,lonBra1)
+comBra2 = hComple(bra2,lonBra2)
+
+print("Complementarias Reino Unido")
+print(comUk1[100:105])
+print(comUk2[100:105])
+print("Originales")
+print(uk1[100:105])
+print(uk2[100:105])
+
+print("Complementarias Estados Unidos")
+head(comUsa1)
+head(comUsa2)
+print("Originales")
+head(usa1)
+head(usa2)
+
+print("Complementarias MÃ©xico")
+head(commx1)
+head(commx2)
+print("Originales")
+head(mx1)
+head(mx2)
+
+print("Complementarias de China")
+head(comChi1)
+head(comChi2)
+print("Originales")
+head(chi1)
+head(chi2)
+
+print("Complementarias de Brasil")
+head(comBra1)
+head(comBra2)
+print("Originales")
+head(bra1)
+head(bra2)
+```
+##Interpretación
+
+Con base en las observaciones anteriores respecto al porcentaje, de acuerdo a la cantidad de los nucleótidos, su acomodo y la longitud del genoma, podemos interpretar que el virus va mutando frecuentemente (Por todos los huéspedes que ha tenido el virus), ya que en la graficación de cantidades es notable la diferencia entre ellas (Cantidad de ATGC). Las diferencias entre los porcentajes según del país donde provienen las variantes, son pequeñas pero pueden llegar a ser significativas, por ejemplo: las C.26, N.7, A, B son provenientes de Chile, Uruguay y China las cuales tienen un porcentaje de GC entre 37.97% a 38% , las de México y Estados Unidos entre 37.92% a 37.96% (W.1, P.1, P.2, B.1.558), y en en el Reino Unido (B.1.1.7,B.1.258) tienen un porcentaje menor entre las dos desde 36.197% a 36.265% tomando en cuenta los caracteres de tipo "n" (Desconocidos); esto se muestra en las primeras gráficas (apartado de porcentajes) de nucleótidos, sin embargo los porcentajes de nucleótidos no varían mucho porque es el mismo virus, esto lo podemos observar en el tercer apartado de gráficas en el código Como explica Sonia Zúñiga, investigadora del CSIC: "En el caso de los coronavirus, incluyendo este SARS-CoV-2, tienen el genoma RNA más grande conocido, de 30.000 nucleótidos. Eso hace que no se puedan permitir cambiar tanto como otros virus RNA" (La Vanguardia, 2020). En el año 2020 era bien sabido que había una cepa del SARS CoV 2 en Reino Unido, podemos interpretar que esta particularidad de elementos "n" en nuestra secuencia de nucleótidos del Reino Unido como una mutación.
+
+Hay variantes las cuales son más contagiosas, como es en el caso de la variante B.1.1.7 de RU que está confirmado que es un 45% más contagiosa que el virus original, esto causado por el cambio en la longitud y la variación de la posición de los nucleótidos, al ser una de las más contagiosas se anticipa que podría ser la variante predominante en el mundo según el Universal, es pero eso que importante acabar con los contagios para evitar que el virus siga mutando, ya que a final del 2020 esta variante ya tenía más de 23 mutaciones registradas, toda la información respecto a las variantes se pueden conocer gracias al genoma aislado, se siguen haciendo investigaciones para saber las implicaciones que tienen estas variantes en la salud de los huéspedes.
+
+
+Agradecimientos: 
+  A los desarrolladores de las siguientes librerÃ­as 
+    library(seqinr)
+    library(ape)
+    library(ggplot2)
+
+Referencias de NCBI: 
+  https://www.ncbi.nlm.nih.gov/labs/virus/vssi/#/
+  Accession Numbers: 
+    1)HG999205.1
+    2)HG999156.1
+    3)NC_045512.2
+    4)MT079851.1
+    5)MW365295.1
+    6)MW298638.1
+    7)MW315214.1
+    8)MW884219.1
+    9)MW914410.1
+    10)MW851843.1
+
+Referencias: 
+Casos de COVID-19 en Nuevo León: Gobierno del Estado de Nuevo León. Gobierno Nuevo León. (n.d.). https://www.nl.gob.mx/publicaciones/casos-de-covid-19-en-nuevo-leon.
+Centers for Disease Control and Prevention. (n.d.). Acerca de las variantes del virus que causa el COVID-19??????. Centers for Disease Control and Prevention. https://espanol.cdc.gov/coronavirus/2019-ncov/transmission/variant.html.
+Centers for Disease Control and Prevention. (n.d.). Variantes del SARS-CoV-2 que generan mayor preocupación. Centers for Disease Control and Prevention. https://espanol.cdc.gov/coronavirus/2019-ncov/cases-updates/variant-surveillance/variant-info.html.
+COVID-19 Map. Johns Hopkins Coronavirus Resource Center. (n.d.). https://coronavirus.jhu.edu/map.html.
+World Health Organization. (2021, March 4). OMS | Variantes del SARS-CoV-2. World Health Organization. https://www.who.int/csr/don/31-december-2020-sars-cov2-variants/es/. 
+La Vanguardia, (2, Sep, 2020) ¿Por qué mutan los virus? https://www.lavanguardia.com/vida/junior-report/20200902/483136011529/por-que-mutan-virus-covid19-coronavirus.html
+El Universal (20,04,2021) Variante británica del coronavirus es 45 % más contagiosa que la original: estudio https://www.eluniversal.com.mx/ciencia-y-salud/coronavirus-variante-britanica-del-coronavirus-es-45-estudio
+
